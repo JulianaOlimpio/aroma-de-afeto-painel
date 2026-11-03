@@ -84,10 +84,9 @@ th{background:#fff5f6!important;color:#8b2b39!important}tr:hover td{background:#
 #auth-logout[hidden]{display:none!important}
 @media(max-width:700px){header{border-right:0;border-bottom:1px solid #eee1e3}.nav{border-bottom:1px solid #eee1e3!important}#auth-logout{position:static;margin:10px 12px}}
 .photo-editor{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.product-thumb{width:64px;height:64px;object-fit:cover;border-radius:10px;border:1px solid #eee}.photo-placeholder{font-size:11px;color:#999}.photo-editor button{height:max-content} </style></head><body><section id="auth-gate" aria-label="Acesso ao painel"><form class="auth-card" id="auth-form"><div class="auth-logo">♡</div><h2>Aroma de Afeto</h2><p>Entre com sua conta autorizada para acessar o painel comercial.</p><label>E-mail<input id="auth-email" type="email" autocomplete="username" required placeholder="seu@email.com"></label><label>Senha<input id="auth-password" type="password" autocomplete="current-password" required placeholder="Sua senha"></label><button id="auth-submit" type="submit">Entrar no painel</button><div id="auth-message" role="status" aria-live="polite"></div></form></section><button id="auth-logout" type="button" hidden>Sair da conta</button><section id="supabase-info" style="background:#fff9e9;border-bottom:1px solid #e7d6ae;padding:12px 22px;font:13px Segoe UI,Arial,sans-serif;color:#533f25">
-<strong>Supabase preparado · sincronização ainda desativada.</strong>
-Acesso por login Supabase habilitado. Os cadastros e vendas deste painel ainda são salvos apenas neste navegador; sincronização com o banco não está ativada.
+<strong id="sync-title">Sincronização aguardando login</strong> <span id="sync-description">Entre com sua conta para verificar os dados online.</span>
 <button type="button" id="supabase-test" style="margin-left:10px;padding:7px 11px;border:1px solid #a28b6a;border-radius:7px;background:#fff;cursor:pointer;color:#533f25">Testar conexão técnica</button>
-<span id="supabase-test-result" role="status" style="margin-left:10px"></span>
+<span id="supabase-test-result" role="status" style="margin-left:10px"></span> <button type="button" id="sync-now" class="alt" style="margin-left:8px;padding:7px 11px">Sincronizar agora</button>
 </section><header><div><svg class="brand-symbol" viewBox="0 0 100 85" fill="none" aria-label="Símbolo decorativo Aroma de Afeto"><path d="M50 68C30 55 15 42 18 26c3-16 22-15 32 1 11-17 30-16 33 0 3 15-13 29-33 41Z" stroke="#f9e7dd" stroke-width="2.5"/><path d="M24 59c22 14 49 14 67-2M50 66c-3-13-3-23 0-35" stroke="#e5b58f" stroke-width="2" stroke-linecap="round"/></svg><small>PERFUMARIA PARA AMBIENTES</small><h1>Aroma de Afeto</h1><p>Gestão de produtos, kits, vendas e reposição</p></div><div style="text-align:right"><small>PAINEL COMERCIAL</small><div id="today" style="margin-top:8px"></div></div></header><main class="wrap"><div class="nav" id="tabs"><button data-tab="dashboard" class="active">Visão geral</button><button data-tab="produtos">Produtos avulsos</button><button data-tab="kits">Montar kits</button><button data-tab="vendas">Registrar vendas</button><button data-tab="reposicao">Reposição de estoque</button><button data-tab="dados">Dados e backup</button></div>
 <section id="dashboard" class="section active"><h1 class="section-title">Painel Comercial — Aroma de Afeto</h1><p class="section-subtitle">Vendas · Estoque · Lucro · Retorno sobre investimento (ROI)</p><div class="cards" id="metrics"></div><div class="panel"><h3>Retorno sobre investimento (ROI)</h3><p class="hint">O ROI realizado usa as vendas registradas. A projeção do estoque usa preços avulsos cadastrados; kits exigem simulação separada para evitar contar os mesmos produtos duas vezes.</p><div class="cards" id="roiMetrics"></div><div id="roiDetails" class="notice"></div></div><div class="two"><div class="panel"><h3>Composição do faturamento</h3><div id="breakdown"></div></div><div class="panel"><h3>Meta para reposição</h3><div id="target"></div></div></div><div class="panel"><h3>Resultado operacional por dia</h3><p class="hint">Compare os dias de maior resultado e faturamento. Passe o mouse sobre as barras para ver os valores.</p><div class="formgrid"><label>De<input type="date" id="chartFrom" onchange="renderDailyChart()"></label><label>Até<input type="date" id="chartTo" onchange="renderDailyChart()"></label></div><div id="dailyChart" style="margin-top:18px"></div></div><div class="panel"><h3>Últimas vendas</h3><div id="recent"></div></div><div class="notice">Os valores de lucro e margem são <b>estimativas operacionais</b>: receita menos custo de produtos, embalagens, despesas variáveis cadastradas e descontos. Não representam lucro líquido contábil. A reserva de reposição considera apenas o custo dos itens efetivamente vendidos.</div></section>
 <section id="produtos" class="section"><div class="panel"><h2>Cadastro de produtos</h2><p class="hint">Cadastre ou edite todos os produtos e acessórios. Os kits usam estes mesmos cadastros, de forma conectada. Estoque inicial é a quantidade física disponível; vendas diminuem o saldo automaticamente.</p><form id="productForm"><input type="hidden" id="pid"><div class="formgrid"><label>Nome do produto<input id="pname" required placeholder="Ex.: Home Spray Elegance"></label><label>Fragrância / variação<input id="pscent" placeholder="Ex.: Baunilha"></label><label>Categoria<select id="pcat"><option>Home Spray</option><option>Difusor</option><option>Vela</option><option>Car Spray</option><option>Refil</option><option>Acessório</option><option>Embalagem</option><option>Outro</option></select></label><label>Custo unitário (R$)<input id="pcost" type="number" step="0.01" min="0" required></label><label>Venda avulsa (R$)<input id="pprice" type="number" step="0.01" min="0" required></label><label>Estoque inicial / ajuste<input id="pstock" type="number" step="1" min="0" value="0" required></label><label>Estoque mínimo desejado<input id="pmin" type="number" step="1" min="0" value="0"></label><label>Observações<input id="pnotes" placeholder="Opcional"></label><label>Foto do produto (JPG, PNG ou WebP)<input id="pphoto" type="file" accept="image/jpeg,image/png,image/webp" onchange="loadProductPhoto(event)"><small>Imagem reduzida automaticamente para facilitar o backup.</small></label><div class="photo-editor"><img id="ppreview" alt="Prévia da foto" style="display:none;width:110px;height:110px;object-fit:cover;border-radius:12px;border:1px solid #eee"><button type="button" class="alt" onclick="removeProductPhoto()">Remover foto</button></div></div><div class="actions"><button type="submit" id="psave">Salvar produto</button><button type="button" class="alt" onclick="resetProduct()">Limpar formulário</button></div></form></div><div class="panel"><div class="flex"><h3>Produtos cadastrados</h3><input id="psearch" placeholder="Buscar produto ou fragrância" style="max-width:300px" oninput="renderProducts()"></div><div class="tablewrap" id="productsTable"></div></div></section>
@@ -97,7 +96,7 @@ Acesso por login Supabase habilitado. Os cadastros e vendas deste painel ainda s
 <section id="dados" class="section"><div class="panel" id="whatsapp-settings"><h2>Personalizar mensagem do WhatsApp</h2><p class="hint">Edite a mensagem enviada pelo botão WhatsApp no histórico de vendas. Use os campos automáticos para preencher os dados de cada pedido. A configuração fica salva neste navegador e também no backup JSON.</p><label for="waTemplate" style="font-size:13px">Mensagem padrão<textarea id="waTemplate" rows="14" spellcheck="true" placeholder="Digite sua mensagem personalizada"></textarea></label><p class="hint" style="margin:12px 0 8px">Clique em um campo para inseri-lo na posição do cursor:</p><div id="waTokens" class="actions" style="margin:0 0 16px"></div><div class="formgrid three"><label>Prévia com a venda<select id="waPreviewSale" onchange="renderWhatsAppPreview()"></select></label></div><div class="actions"><button type="button" onclick="saveWhatsAppTemplate()">Salvar mensagem</button><button type="button" class="alt" onclick="resetWhatsAppTemplate()">Restaurar mensagem original</button><button type="button" class="alt" onclick="copyWhatsAppPreview()">Copiar prévia</button></div><p id="waTemplateStatus" class="muted mini" role="status" aria-live="polite"></p><h3 style="margin-top:20px">Prévia da mensagem</h3><pre id="waPreview" style="white-space:pre-wrap;overflow-wrap:anywhere;font:14px/1.65 'Segoe UI',Arial,sans-serif;background:#fff7f8;border:1px solid #efd9dd;border-radius:12px;padding:17px;min-height:140px"></pre><p class="muted mini">O WhatsApp será aberto com a mensagem pronta para conferência e envio. Nenhuma mensagem é enviada automaticamente.</p></div><div class="panel"><h2>Salvar e proteger seus dados</h2><p class="hint">O painel funciona sem internet e guarda as alterações neste navegador, neste dispositivo. Para não perder dados ao limpar o navegador ou trocar de computador, exporte backups regularmente.</p><div class="actions"><button onclick="exportData()">Exportar backup JSON</button><button class="alt" onclick="document.getElementById('importFile').click()">Importar backup JSON</button><input id="importFile" type="file" accept="application/json,.json" style="display:none" onchange="importData(event)"><button class="alt" onclick="exportSalesCSV()">Exportar vendas CSV</button><button class="alt" onclick="exportProductsCSV()">Exportar produtos CSV</button></div></div><div class="panel"><h3>Configurações</h3><label style="max-width:300px">Pedido mínimo para reposição (R$)<input id="minimum" type="number" min="0" step="0.01" onchange="setMinimum()"></label><div class="actions"><button class="danger" onclick="clearAll()">Apagar todos os dados</button></div></div><div class="notice">Os produtos de exemplo foram pré-cadastrados com custos conhecidos da conversa. Confira os valores, fragrâncias e quantidades reais antes de registrar vendas. Os kits não são criados automaticamente: você monta livremente conforme desejar.</div></section><div class="footer">Aroma de Afeto · Painel local editável · Dados salvos no navegador · Faça backups frequentes</div></main>
 <script>
 const KEY='aroma_afeto_painel_v1';const money=n=>Number(n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});const pct=n=>Number(n||0).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+'%';const num=n=>Number(n)||0;const uid=()=>String(Date.now())+Math.random().toString(36).slice(2,7);const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const seed=()=>({products:[{id:'p1',name:'Home Spray Elegance',scent:'Baunilha',cat:'Home Spray',cost:55.5,price:89.9,stock:0,min:0},{id:'p2',name:'Difusor Elegance',scent:'Baunilha',cat:'Difusor',cost:59.9,price:109.9,stock:0,min:0},{id:'p3',name:'Vela lata 50 g',scent:'Lavanda',cat:'Vela',cost:25.9,price:52.9,stock:0,min:0},{id:'p4',name:'Vela lata 50 g',scent:'Cereja e Avelã',cat:'Vela',cost:25.9,price:52.9,stock:0,min:0},{id:'p5',name:'Home Spray Baby',scent:'Baby',cat:'Home Spray',cost:48.9,price:0,stock:0,min:0},{id:'p6',name:'Difusor Baby',scent:'Baby',cat:'Difusor',cost:56.9,price:0,stock:0,min:0},{id:'p7',name:'Home Spray Madeira Nobre',scent:'Madeira Nobre',cat:'Home Spray',cost:48.9,price:0,stock:0,min:0},{id:'p8',name:'Car Spray',scent:'Madeira Nobre',cat:'Car Spray',cost:32.9,price:0,stock:0,min:0},{id:'p9',name:'Bandeja espelhada',scent:'',cat:'Acessório',cost:19.9,price:0,stock:0,min:0},{id:'p10',name:'Refil 250 ml',scent:'Baunilha',cat:'Refil',cost:49.9,price:0,stock:0,min:0},{id:'p11',name:'Home Spray Elegance',scent:'Floral',cat:'Home Spray',cost:55.5,price:89.9,stock:0,min:0},{id:'p12',name:'Difusor Elegance',scent:'Frutas Vermelhas',cat:'Difusor',cost:59.9,price:109.9,stock:0,min:0},{id:'p13',name:'Difusor Elegance',scent:'Floral',cat:'Difusor',cost:59.9,price:109.9,stock:0,min:0}],kits:[],sales:[],purchases:[],reserveAdjustment:0,minimum:500});let db;try{db=JSON.parse(localStorage.getItem(KEY))||seed()}catch{db=seed()}let draftItems=[],replenishCart={};function save(){localStorage.setItem(KEY,JSON.stringify(db))}const product=id=>db.products.find(p=>p.id===id);const kit=id=>db.kits.find(k=>k.id===id);const pname=p=>p?p.name+(p.scent?' — '+p.scent:''):'Produto excluído';const kitCost=k=>(k?.items||[]).reduce((a,i)=>a+num(product(i.id)?.cost)*i.qty,0)+num(k?.extra);const kitStock=k=>!k.items.length?0:Math.max(0,Math.min(...k.items.map(i=>Math.floor(num(product(i.id)?.stock)/i.qty))));const margin=(price,cost)=>price?((price-cost)/price*100):0;const totals=()=>db.sales.reduce((a,s)=>{a.revenue+=s.revenue;a.cost+=s.cost;a.fees+=s.fee;a.units+=s.qty;return a},{revenue:0,cost:0,fees:0,units:0});const reserved=()=>db.sales.reduce((a,s)=>a+s.costProducts,0)+num(db.reserveAdjustment)-db.purchases.reduce((a,p)=>a+p.total,0);const stockValue=()=>db.products.reduce((a,p)=>a+p.stock*p.cost,0);const table=(heads,rows)=>'<table><thead><tr>'+heads.map(h=>'<th>'+h+'</th>').join('')+'</tr></thead><tbody>'+(rows.length?rows.join(''):'<tr><td colspan="'+heads.length+'" class="empty">Nenhum registro ainda.</td></tr>')+'</tbody></table>';const cell=(v,cls='')=>'<td class="'+cls+'">'+v+'</td>';function renderAll(){save();renderDashboard();renderDailyChart();renderProducts();renderKitOptions();renderKits();fillSaleItems(true);renderSales();renderReplenishment();renderStock();document.getElementById('minimum').value=db.minimum}function renderROI(t,profit){
+const seed=()=>({products:[{id:'p1',name:'Home Spray Elegance',scent:'Baunilha',cat:'Home Spray',cost:55.5,price:89.9,stock:0,min:0},{id:'p2',name:'Difusor Elegance',scent:'Baunilha',cat:'Difusor',cost:59.9,price:109.9,stock:0,min:0},{id:'p3',name:'Vela lata 50 g',scent:'Lavanda',cat:'Vela',cost:25.9,price:52.9,stock:0,min:0},{id:'p4',name:'Vela lata 50 g',scent:'Cereja e Avelã',cat:'Vela',cost:25.9,price:52.9,stock:0,min:0},{id:'p5',name:'Home Spray Baby',scent:'Baby',cat:'Home Spray',cost:48.9,price:0,stock:0,min:0},{id:'p6',name:'Difusor Baby',scent:'Baby',cat:'Difusor',cost:56.9,price:0,stock:0,min:0},{id:'p7',name:'Home Spray Madeira Nobre',scent:'Madeira Nobre',cat:'Home Spray',cost:48.9,price:0,stock:0,min:0},{id:'p8',name:'Car Spray',scent:'Madeira Nobre',cat:'Car Spray',cost:32.9,price:0,stock:0,min:0},{id:'p9',name:'Bandeja espelhada',scent:'',cat:'Acessório',cost:19.9,price:0,stock:0,min:0},{id:'p10',name:'Refil 250 ml',scent:'Baunilha',cat:'Refil',cost:49.9,price:0,stock:0,min:0},{id:'p11',name:'Home Spray Elegance',scent:'Floral',cat:'Home Spray',cost:55.5,price:89.9,stock:0,min:0},{id:'p12',name:'Difusor Elegance',scent:'Frutas Vermelhas',cat:'Difusor',cost:59.9,price:109.9,stock:0,min:0},{id:'p13',name:'Difusor Elegance',scent:'Floral',cat:'Difusor',cost:59.9,price:109.9,stock:0,min:0}],kits:[],sales:[],purchases:[],reserveAdjustment:0,minimum:500});let db;try{db=JSON.parse(localStorage.getItem(KEY))||seed()}catch{db=seed()}let draftItems=[],replenishCart={};function save(){localStorage.setItem(KEY,JSON.stringify(db));if(window.AROMA_SYNC_READY && !window.AROMA_SYNC_APPLYING){window.AROMA_SYNC_DIRTY=true;localStorage.setItem("aroma_sync_pending_v1","1");window.dispatchEvent(new Event("aroma-local-change"));}}const product=id=>db.products.find(p=>p.id===id);const kit=id=>db.kits.find(k=>k.id===id);const pname=p=>p?p.name+(p.scent?' — '+p.scent:''):'Produto excluído';const kitCost=k=>(k?.items||[]).reduce((a,i)=>a+num(product(i.id)?.cost)*i.qty,0)+num(k?.extra);const kitStock=k=>!k.items.length?0:Math.max(0,Math.min(...k.items.map(i=>Math.floor(num(product(i.id)?.stock)/i.qty))));const margin=(price,cost)=>price?((price-cost)/price*100):0;const totals=()=>db.sales.reduce((a,s)=>{a.revenue+=s.revenue;a.cost+=s.cost;a.fees+=s.fee;a.units+=s.qty;return a},{revenue:0,cost:0,fees:0,units:0});const reserved=()=>db.sales.reduce((a,s)=>a+s.costProducts,0)+num(db.reserveAdjustment)-db.purchases.reduce((a,p)=>a+p.total,0);const stockValue=()=>db.products.reduce((a,p)=>a+p.stock*p.cost,0);const table=(heads,rows)=>'<table><thead><tr>'+heads.map(h=>'<th>'+h+'</th>').join('')+'</tr></thead><tbody>'+(rows.length?rows.join(''):'<tr><td colspan="'+heads.length+'" class="empty">Nenhum registro ainda.</td></tr>')+'</tbody></table>';const cell=(v,cls='')=>'<td class="'+cls+'">'+v+'</td>';function renderAll(){save();renderDashboard();renderDailyChart();renderProducts();renderKitOptions();renderKits();fillSaleItems(true);renderSales();renderReplenishment();renderStock();document.getElementById('minimum').value=db.minimum}function renderROI(t,profit){
   const soldCost=t.cost;
   const roiReal=soldCost>0?profit/soldCost*100:null;
   const priced=db.products.filter(p=>num(p.stock)>0&&num(p.price)>0);
@@ -196,7 +195,7 @@ function addReplenishment(){let id=document.getElementById('rproduct').value,q=n
 const AROMA_SUPABASE = Object.freeze({
   url: 'https://dzandtnpwzvmfxbzmrzk.supabase.co',
   publishableKey: 'sb_publishable_GB2qtc8McufKE7hFFRZFcQ_pqzVtJ0S',
-  synchronizationEnabled: false
+  synchronizationEnabled: true
 });
 document.getElementById('supabase-test').addEventListener('click', async () => {
   const status = document.getElementById('supabase-test-result');
@@ -225,7 +224,7 @@ document.getElementById('supabase-test').addEventListener('click', async () => {
   const form=document.getElementById('auth-form');
   const submit=document.getElementById('auth-submit');
   const key='aroma_auth_session_v1';
-  const show=()=>{gate.hidden=false;logout.hidden=true;window.AROMA_ACCESS_TOKEN=null;};
+  const show=()=>{gate.hidden=false;logout.hidden=true;window.AROMA_ACCESS_TOKEN=null;window.dispatchEvent(new Event("aroma-auth-lost"));};
   const hide=()=>{gate.hidden=true;logout.hidden=false;};
   const forget=()=>{sessionStorage.removeItem(key);show();};
   async function api(path,method,body,token){
@@ -239,6 +238,7 @@ document.getElementById('supabase-test').addEventListener('click', async () => {
     if(!user.id)throw new Error('Sessão inválida');
     window.AROMA_ACCESS_TOKEN=access;
     hide();
+    window.dispatchEvent(new Event("aroma-auth-ready"));
   }
   form.addEventListener('submit',async e=>{
     e.preventDefault();submit.disabled=true;msg.textContent='Verificando acesso...';
@@ -267,5 +267,91 @@ document.getElementById('supabase-test').addEventListener('click', async () => {
       sessionStorage.setItem(key,JSON.stringify({access_token:refreshed.access_token,refresh_token:refreshed.refresh_token,expires_at:Date.now()+refreshed.expires_in*1000}));
     }catch(_){forget();}
   })();
+})();
+</script><script>
+/* Sincronizacao com estado completo por usuario. Nenhuma chave secreta no navegador. */
+(()=>{
+ const endpoint=AROMA_SUPABASE.url+'/rest/v1';
+ const rpc=AROMA_SUPABASE.url+'/rest/v1/rpc/aroma_salvar_estado';
+ const title=document.getElementById('sync-title');
+ const description=document.getElementById('sync-description');
+ const button=document.getElementById('sync-now');
+ let revision=null, busy=false, timer=null, started=false, owner=null;window.AROMA_SYNC_DIRTY=localStorage.getItem("aroma_sync_pending_v1")==="1";
+ const revisionKey='aroma_sync_revision_v1';
+ const ownerKey='aroma_sync_owner_v1';
+ const state=(label,detail)=>{title.textContent=label;description.textContent=detail;};
+ const token=()=>window.AROMA_ACCESS_TOKEN;
+ function authHeaders(){return {'apikey':AROMA_SUPABASE.publishableKey,'Authorization':'Bearer '+token(),'Content-Type':'application/json'};}
+ async function request(url,options={}){
+  if(!token())throw Error('Entre novamente com seu login Supabase.');
+  const res=await fetch(url,{...options,headers:{...authHeaders(),...(options.headers||{})}});
+  if(!res.ok){let detail=await res.text().catch(()=> '');throw Error('HTTP '+res.status+(detail?': '+detail.slice(0,220):''));}
+  return res.status===204?null:res.json();
+ }
+ async function userId(){const u=await request(AROMA_SUPABASE.url+'/auth/v1/user');return u.id;}
+ function snapshot(){return JSON.parse(JSON.stringify(db));}
+ function applyRemote(data){
+  if(!data||!Array.isArray(data.products)||!Array.isArray(data.kits)||!Array.isArray(data.sales)||!Array.isArray(data.purchases))throw Error('O estado remoto tem estrutura inesperada.');
+  window.AROMA_SYNC_APPLYING=true;
+  try{db=data;renderAll();renderWhatsAppSettings();}finally{window.AROMA_SYNC_APPLYING=false;}
+ }
+ async function sync(){
+  if(busy)return; if(!token()){state('Sincronização aguardando login','Entre com sua conta Supabase para sincronizar.');return;}
+  busy=true;button.disabled=true;
+  try{
+   state('Sincronizando...', 'Conferindo a versao online antes de salvar.');
+   const currentOwner=await userId();
+   if(owner && owner!==currentOwner){window.AROMA_SYNC_DIRTY=false;revision=null;}
+   owner=currentOwner;
+   const rows=await request(endpoint+'/aroma_painel_estado?select=dados,versao&usuario_id=eq.'+encodeURIComponent(owner)+'&limit=1');
+   const remote=rows[0];
+   const savedOwner=localStorage.getItem(ownerKey);
+   const savedRevision=Number(localStorage.getItem(revisionKey)||0);
+   if(!remote){
+    if(!confirm('Esta conta ainda não possui um painel sincronizado. Deseja enviar os dados deste navegador para criar a primeira cópia online? Antes, exporte um backup JSON. OK = enviar; Cancelar = manter somente local.')){state('Sincronização pausada','Dados locais preservados; faça backup antes de enviar.');return;}
+    if(savedOwner && savedOwner!==owner)throw Error("Conta diferente detectada. Exporte backup e abra um navegador limpo antes de iniciar esta conta.");
+    // Primeira publicacao: nao sobrescrever tabelas preexistentes; snapshot independente.
+    const result=await request(rpc,{method:'POST',body:JSON.stringify({p_versao:0,p_dados:snapshot()})});
+    if(result!==1)throw Error('O estado foi criado em outra sessao. Atualize a pagina.');
+    revision=1;
+   }else if(window.AROMA_SYNC_DIRTY){
+    const expected=(savedOwner===owner&&savedRevision>0)?savedRevision:remote.versao;
+    if(savedOwner===owner&&savedRevision>0&&remote.versao!==savedRevision){
+     state('Conflito de sincronizacao', 'O banco foi alterado em outro dispositivo. Exporte um backup JSON antes de decidir.');
+     return;
+    }
+    // Primeira conexao com dados locais: pedir escolha quando o banco ja possui estado.
+    if((savedOwner!==owner || !savedRevision) && !confirm('Ja existem dados online para esta conta. OK = usar os dados online (recomendado). Cancelar = manter os dados locais sem sincronizar. Exporte um backup JSON antes de continuar.')){
+     state('Sincronizacao pausada','Dados locais preservados. Exporte backup e escolha como conciliar.');return;
+    }
+    if(savedOwner!==owner || !savedRevision){applyRemote(remote.dados);window.AROMA_SYNC_DIRTY=false;revision=remote.versao;}
+    else{
+     const result=await request(rpc,{method:'POST',body:JSON.stringify({p_versao:expected,p_dados:snapshot()})});
+     if(result!==expected+1)throw Error('Conflito de versao. Nada foi sobrescrito.');
+     revision=result;
+    }
+   }else{
+    if(savedOwner===owner&&savedRevision>0&&savedRevision===remote.versao){revision=remote.versao;}
+    else{applyRemote(remote.dados);revision=remote.versao;}
+   }
+   localStorage.setItem(ownerKey,owner);
+   localStorage.setItem(revisionKey,String(revision));
+   window.AROMA_SYNC_DIRTY=false;localStorage.removeItem("aroma_sync_pending_v1");
+   state('Sincronizado com Supabase', 'Dados protegidos por login. Ultima verificacao: '+new Date().toLocaleTimeString('pt-BR'));
+  }catch(e){state('Erro de sincronizacao',e.message+' | Os dados locais foram mantidos.');}
+  finally{busy=false;button.disabled=false;}
+ }
+ function changed(){if(!started||!token())return;state('Alteracoes pendentes','Salvo neste navegador; enviando ao Supabase...');clearTimeout(timer);timer=setTimeout(sync,900);}
+ window.addEventListener('aroma-local-change',changed);
+ window.addEventListener('aroma-auth-ready',async()=>{
+  if(!started){started=true;window.AROMA_SYNC_READY=true;}
+  // Se houver alteracoes locais nao publicadas de uma sessao anterior, preservar a escolha.
+  await sync();
+ });
+ window.addEventListener('aroma-auth-lost',()=>{clearTimeout(timer);state('Sincronizacao aguardando login','Entre com sua conta para acessar os dados online.');});
+ button.addEventListener('click',sync);
+ window.addEventListener('online',()=>{if(token())sync();});
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&token())sync();});
+ setInterval(()=>{if(token())sync();},60000);
 })();
 </script></body></html>
